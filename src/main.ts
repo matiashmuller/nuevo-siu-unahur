@@ -4,7 +4,7 @@ import { iniciarLogin } from "./views/login";
 import { iniciarMaterias } from "./views/materias";
 import { iniciarComision } from "./views/comision";
 import { renderAlumnos } from "./views/alumnos";
-import { irA, type Vista } from './router';
+import { irA, type Vista } from "./router";
 
 function crearLayout(): void {
   if (document.getElementById("nuevo-siu-root")) return;
@@ -48,8 +48,8 @@ function crearLayout(): void {
           <form id="formLogin">
             <div class="field">
               <label for="usuario">Usuario</label>
-              <input id="usuario" type="email" autocomplete="username"
-                placeholder="usuario@unahur.edu.ar" required>
+              <input id="usuario" type="text" autocomplete="username"
+                inputmode="numeric" placeholder="DNI o usuario" required>
             </div>
 
             <div class="field">

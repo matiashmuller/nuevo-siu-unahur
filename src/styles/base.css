@@ -11,7 +11,7 @@
   --green-2: #20392c;
   --amber: #f4bd71;
   --amber-bg: #3b2c19;
-  --shadow: 0 14px 40px rgba(0, 0, 0, .21);
+  --shadow: 0 14px 40px rgba(0, 0, 0, 0.21);
 }
 
 * {
@@ -22,7 +22,13 @@ body {
   margin: 0;
   background: var(--bg);
   color: var(--ink);
-  font: 15px/1.5 Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  font:
+    15px/1.5 Inter,
+    ui-sans-serif,
+    system-ui,
+    -apple-system,
+    "Segoe UI",
+    sans-serif;
 }
 
 button,
@@ -70,7 +76,7 @@ button {
   color: var(--green);
   font-size: 19px;
   font-weight: 800;
-  letter-spacing: -.6px;
+  letter-spacing: -0.6px;
   white-space: nowrap;
 }
 
@@ -80,7 +86,7 @@ button {
   color: var(--muted);
   font-size: 10px;
   font-weight: 600;
-  letter-spacing: .09em;
+  letter-spacing: 0.09em;
   text-transform: uppercase;
 }
 
@@ -194,7 +200,7 @@ main {
   color: var(--green);
   font-size: 12px;
   font-weight: 750;
-  letter-spacing: .09em;
+  letter-spacing: 0.09em;
   text-transform: uppercase;
 }
 
@@ -202,13 +208,13 @@ h1 {
   margin: 0 0 7px;
   font-size: 30px;
   line-height: 1.2;
-  letter-spacing: -.7px;
+  letter-spacing: -0.7px;
 }
 
 h2 {
   margin: 0;
   font-size: 19px;
-  letter-spacing: -.3px;
+  letter-spacing: -0.3px;
 }
 
 .lead {
@@ -247,7 +253,7 @@ input {
 select:focus,
 input:focus {
   border-color: #75a990;
-  box-shadow: 0 0 0 3px rgba(23, 107, 82, .1);
+  box-shadow: 0 0 0 3px rgba(23, 107, 82, 0.1);
 }
 
 .term select {
@@ -487,7 +493,7 @@ th {
   background: var(--surface-2);
   color: var(--muted);
   font-size: 11px;
-  letter-spacing: .07em;
+  letter-spacing: 0.07em;
   text-transform: uppercase;
 }
 
@@ -683,4 +689,34 @@ tbody tr:last-child td {
   .mobile-nav {
     display: none !important;
   }
+}
+
+/* Ocultar temporalmente la interfaz original de Guaraní */
+body > *:not(#nuevo-siu-root) {
+  display: none !important;
+}
+
+body {
+  overflow: hidden;
+}
+
+#nuevo-siu-root {
+  position: fixed;
+  inset: 0;
+  z-index: 2147483647;
+  overflow: auto;
+}
+
+#nuevo-siu-root h1,
+#nuevo-siu-root h2,
+#nuevo-siu-root h3 {
+  color: var(--ink) !important;
+  font-family: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif !important;
+}
+
+#nuevo-siu-root h1 {
+  color: var(--ink) !important;
+  font-size: 30px !important;
+  font-weight: 800 !important;
+  letter-spacing: -.7px !important;
 }

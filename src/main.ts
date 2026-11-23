@@ -5,6 +5,7 @@ import { iniciarMaterias } from "./views/materias";
 import { iniciarComision } from "./views/comision";
 import { renderAlumnos } from "./views/alumnos";
 import { irA, type Vista } from "./router";
+import { esperarZonaComisiones, extraerZonaComisiones } from "./guarani/extractor";
 
 function crearLayout(): void {
   if (document.getElementById("nuevo-siu-root")) return;
@@ -239,6 +240,10 @@ function crearLayout(): void {
   document.getElementById("botonPerfil")?.addEventListener("click", () => {
     const menu = document.getElementById("menuPerfil");
     if (menu) menu.hidden = !menu.hidden;
+  });
+
+  esperarZonaComisiones().then((datos) => {
+    console.log("Datos extraídos de Guaraní:", datos);
   });
 
   iniciarLogin();

@@ -1,0 +1,14 @@
+{
+  "manifest_version": 3,
+  "name": "Nuevo SIU",
+  "version": "0.1.0",
+  "description": "Interfaz moderna para SIU Guaraní UNAHUR",
+  "content_scripts": [
+    {
+      "matches": ["https://servicios.unahur.edu.ar/unahur3w/*"],
+      "js": ["src/main.ts"],
+      "css": ["src/styles/base.css"],
+      "run_at": "document_start"
+    }
+  ]
+}

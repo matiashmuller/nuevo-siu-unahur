@@ -373,3 +373,63 @@ export function extraerZonaComisiones(): DatosZonaComisiones {
     materias: extraerMaterias(),
   };
 }
+
+export function obtenerPeriodoSeleccionadoId(doc: Document = document): string {
+  const selector = doc.querySelector<HTMLSelectElement>(
+    'select[name="periodo"], select[id*="periodo"]',
+  );
+  return selector?.value ?? "";
+}
+
+export function filtrarPorPeriodoEnGuarani(
+  periodoId: string,
+): Promise<DatosZonaComisiones> {
+  const contenido = document.getElementById("kernel_contenido");
+  const selectOriginal = contenido?.querySelector<HTMLSelectElement>(
+    'select[name="periodo"], select[id*="periodo"]',
+  );
+
+  if (!contenido || !selectOriginal) {
+    return Promise.resolve(extraerZonaComisiones());
+  }
+
+  selectOriginal.value = periodoId;
+  selectOriginal.dispatchEvent(new Event("change", { bubbles: true }));
+
+  const formFiltro = selectOriginal.closest("form");
+  const botonFiltrar =
+    formFiltro?.querySelector<HTMLElement>(
+      'button[type="submit"], input[type="submit"], button',
+    ) ??
+    Array.from(contenido.querySelectorAll<HTMLElement>("button, input[type='submit'], a.btn"))
+      .find((el) => /filtrar/i.test(el.textContent ?? (el as HTMLInputElement).value ?? ""));
+
+  const htmlAnterior = contenido.innerHTML;
+
+  if (botonFiltrar) {
+    botonFiltrar.click();
+  } else if (formFiltro) {
+    formFiltro.requestSubmit();
+  }
+
+  return new Promise((resolve) => {
+    let intentos = 0;
+    const maxIntentos = 40;
+
+    const revisar = () => {
+      const loading = document.getElementById("loading_top");
+      const cargando = loading && loading.style.display !== "none";
+      const cambioDom = contenido.innerHTML !== htmlAnterior;
+
+      if ((!cargando && cambioDom) || intentos >= maxIntentos) {
+        resolve(extraerZonaComisiones());
+        return;
+      }
+
+      intentos += 1;
+      window.setTimeout(revisar, 200);
+    };
+
+    window.setTimeout(revisar, 150);
+  });
+}

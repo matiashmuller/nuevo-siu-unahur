@@ -8,6 +8,7 @@ import { iniciarMaterias, renderMaterias } from "./views/materias";
 import {
   esperarZonaComisiones,
   extraerPeriodoLectivo,
+  obtenerPeriodoSeleccionadoId,
 } from "./guarani/extractor";
 
 let listenersGlobalesInicializados = false;
@@ -289,6 +290,15 @@ function registrarListenersGlobales(): void {
 }
 
 function sincronizarRuta(): void {
+  const urlActual = new URL(window.location.href);
+  if (
+    urlActual.searchParams.has("password") ||
+    urlActual.searchParams.has("usuario")
+  ) {
+    urlActual.searchParams.delete("password");
+    urlActual.searchParams.delete("usuario");
+    window.history.replaceState(null, "", urlActual.toString());
+  }
   if (!document.body) return;
   registrarListenersGlobales();
 
@@ -316,6 +326,12 @@ function sincronizarRuta(): void {
         select.innerHTML = state.periodosDisponibles
           .map((p) => `<option value="${p.id}">${p.nombre}</option>`)
           .join("");
+
+        const idActivo = obtenerPeriodoSeleccionadoId();
+        if (idActivo) {
+          select.value = idActivo;
+          state.periodo = idActivo;
+        }
       }
 
       renderMaterias();

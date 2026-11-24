@@ -6,8 +6,6 @@ export function iniciarLogin(): void {
 
   const usuarioInput = document.getElementById('usuario') as HTMLInputElement | null;
   const passwordInput = document.getElementById('password') as HTMLInputElement | null;
-  if (usuarioInput && !usuarioInput.name) usuarioInput.name = 'usuario';
-  if (passwordInput && !passwordInput.name) passwordInput.name = 'password';
 
   form.addEventListener('submit', async (evento) => {
     evento.preventDefault();
@@ -15,6 +13,11 @@ export function iniciarLogin(): void {
     const usuario = usuarioInput?.value.trim() ?? '';
     const password = passwordInput?.value ?? '';
     if (!usuario || !password) return;
+
+    if (passwordInput) {
+      passwordInput.value = '';
+      passwordInput.removeAttribute('name');
+    }
 
     const body = new URLSearchParams();
     body.set('usuario', usuario);
@@ -41,12 +44,15 @@ export function iniciarLogin(): void {
         return;
       }
 
-      if (respuesta.url && !respuesta.url.endsWith('/acceso')) {
-        window.location.assign(respuesta.url);
-        return;
+      const urlDestino = new URL('https://servicios.unahur.edu.ar/unahur3w/zona_comisiones');
+      if (respuesta.url && !respuesta.url.includes('/acceso')) {
+        const candidata = new URL(respuesta.url, window.location.origin);
+        candidata.searchParams.delete('usuario');
+        candidata.searchParams.delete('password');
+        urlDestino.href = candidata.toString();
       }
 
-      window.location.assign('https://servicios.unahur.edu.ar/unahur3w/zona_comisiones');
+      window.location.assign(urlDestino.toString());
     } catch {
       irA('materias');
     }

@@ -1,10 +1,12 @@
+// src/types.ts
 export interface Comision {
   id: string;
   nombre: string;
   turno: string;
   inscriptos: number;
-  periodo: string;
-  horarios: string[];
+  periodo?: string;
+  horarios?: string[];
+  url?: string;
 }
 
 export interface Materia {

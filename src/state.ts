@@ -1,60 +1,53 @@
+import type { DatosZonaComisiones } from './guarani/tipos';
 import type { Alumno, ComisionSeleccionada, Materia } from './types';
 
 export const state = {
   usuario: {
     nombre: 'Matías Horacio Müller',
-    iniciales: 'MM'
+    iniciales: 'MM',
   },
 
   periodo: 'vigentes',
+  periodosDisponibles: [] as { id: string; nombre: string }[],
 
-  materias: [
-    {
-      id: 'poo',
-      nombre: 'Programación de objetos I',
-      comisiones: [
-        {
-          id: 'poo-2',
-          nombre: 'Comisión 2',
-          turno: 'Tarde',
-          inscriptos: 62,
-          periodo: 'Segundo cuatrimestre 2026',
-          horarios: [
-            'Martes 14:00–18:00 · Presencial',
-            'Sábado 10:00–12:00 · Virtual'
-          ]
-        },
-        {
-          id: 'poo-3',
-          nombre: 'Comisión 3',
-          turno: 'Noche',
-          inscriptos: 46,
-          periodo: 'Segundo cuatrimestre 2026',
-          horarios: []
-        }
-      ]
-    },
-    {
-      id: 'git',
-      nombre: 'Taller de Git y GitHub',
-      comisiones: [
-        {
-          id: 'git-ef',
-          nombre: 'EF: Taller de Git y GitHub',
-          turno: 'Tarde',
-          inscriptos: 193,
-          periodo: 'Segundo cuatrimestre 2026',
-          horarios: []
-        }
-      ]
-    }
-  ] satisfies Materia[],
+  materias: [] as Materia[],
 
   comisionSeleccionada: null as ComisionSeleccionada | null,
 
   alumnos: [
     { nombre: 'Lucía Fernández', legajo: '10234', estado: 'Activo' },
     { nombre: 'Juan Pérez', legajo: '10567', estado: 'Activo' },
-    { nombre: 'Sofía Gómez', legajo: '10891', estado: 'Activo' }
-  ] satisfies Alumno[]
+    { nombre: 'Sofía Gómez', legajo: '10891', estado: 'Activo' },
+  ] satisfies Alumno[],
 };
+
+export function aplicarDatosZonaComisiones(
+  datos: DatosZonaComisiones,
+  periodoActual?: string
+): void {
+  state.periodosDisponibles = datos.periodos;
+
+  const periodoCoincidente = datos.periodos.find(
+    (p) => p.id === periodoActual || p.nombre === periodoActual
+  )?.nombre;
+
+  const periodoFallback =
+    periodoCoincidente ??
+    (periodoActual && periodoActual !== 'vigentes' ? periodoActual : undefined) ??
+    datos.periodos[0]?.nombre ??
+    'Período vigente';
+
+  state.materias = datos.materias.map((m) => ({
+    id: m.id,
+    nombre: m.nombre,
+    comisiones: m.comisiones.map((c) => ({
+      id: c.id,
+      nombre: c.nombre,
+      turno: c.turno,
+      inscriptos: c.inscriptos,
+      periodo: c.periodo || periodoFallback,
+      horarios: c.horarios ?? [],
+      url: c.url,
+    })),
+  }));
+}

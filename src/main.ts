@@ -1,14 +1,27 @@
 import "./styles/base.css";
-import { state } from "./state";
 import { iniciarLogin } from "./views/login";
-import { iniciarMaterias } from "./views/materias";
 import { iniciarComision } from "./views/comision";
 import { renderAlumnos } from "./views/alumnos";
-import { irA, type Vista } from "./router";
-import { esperarZonaComisiones, extraerZonaComisiones } from "./guarani/extractor";
+import { irA, resolverRuta, type Vista } from "./router";
+import { aplicarDatosZonaComisiones, state } from "./state";
+import { iniciarMaterias, renderMaterias } from "./views/materias";
+import {
+  esperarZonaComisiones,
+  extraerPeriodoLectivo,
+} from "./guarani/extractor";
 
-function crearLayout(): void {
-  if (document.getElementById("nuevo-siu-root")) return;
+let listenersGlobalesInicializados = false;
+let vistasInicializadas = false;
+let extraccionIniciada = false;
+
+function desmontarApp(): void {
+  document.documentElement.classList.remove("nuevo-siu-activo");
+  document.getElementById("nuevo-siu-root")?.remove();
+}
+
+function crearLayoutSiNoExiste(): HTMLElement {
+  const existente = document.getElementById("nuevo-siu-root");
+  if (existente) return existente;
 
   const root = document.createElement("div");
   root.className = "shell logged-out";
@@ -40,7 +53,7 @@ function crearLayout(): void {
     </header>
 
     <main>
-      <section id="login" class="view active">
+      <section id="login" class="view">
         <div class="card login-layout">
           <p class="eyebrow">Portal docente</p>
           <h1>Ingresá a tu cuenta</h1>
@@ -203,6 +216,29 @@ function crearLayout(): void {
 
   document.body.appendChild(root);
 
+  document
+    .getElementById("botonPerfil")
+    ?.addEventListener("click", (evento) => {
+      evento.stopPropagation();
+      const menu = document.getElementById("menuPerfil");
+      if (menu) menu.hidden = !menu.hidden;
+    });
+
+  if (!vistasInicializadas) {
+    vistasInicializadas = true;
+    iniciarLogin();
+    iniciarMaterias();
+    iniciarComision();
+    renderAlumnos();
+  }
+
+  return root;
+}
+
+function registrarListenersGlobales(): void {
+  if (listenersGlobalesInicializados) return;
+  listenersGlobalesInicializados = true;
+
   document.addEventListener("click", (evento) => {
     const boton =
       evento.target instanceof Element
@@ -211,7 +247,6 @@ function crearLayout(): void {
 
     if (boton) {
       evento.preventDefault();
-
       const vista = boton.dataset.vista as Vista | undefined;
 
       if (vista === "comision" && !state.comisionSeleccionada) {
@@ -237,23 +272,61 @@ function crearLayout(): void {
     }
   });
 
-  document.getElementById("botonPerfil")?.addEventListener("click", () => {
-    const menu = document.getElementById("menuPerfil");
-    if (menu) menu.hidden = !menu.hidden;
-  });
+  const originalPushState = history.pushState.bind(history);
+  history.pushState = function (...args) {
+    originalPushState(...args);
+    queueMicrotask(sincronizarRuta);
+  };
 
-  esperarZonaComisiones().then((datos) => {
-    console.log("Datos extraídos de Guaraní:", datos);
-  });
+  const originalReplaceState = history.replaceState.bind(history);
+  history.replaceState = function (...args) {
+    originalReplaceState(...args);
+    queueMicrotask(sincronizarRuta);
+  };
 
-  iniciarLogin();
-  iniciarMaterias();
-  iniciarComision();
-  renderAlumnos();
+  window.addEventListener("popstate", sincronizarRuta);
+  window.addEventListener("hashchange", sincronizarRuta);
+}
+
+function sincronizarRuta(): void {
+  if (!document.body) return;
+  registrarListenersGlobales();
+
+  const ruta = resolverRuta(window.location.pathname);
+
+  if (!ruta.habilitada) {
+    desmontarApp();
+    return;
+  }
+
+  document.documentElement.classList.add("nuevo-siu-activo");
+  crearLayoutSiNoExiste();
+  irA(ruta.vista);
+
+  if (ruta.vista === "materias" && !extraccionIniciada) {
+    extraccionIniciada = true;
+    esperarZonaComisiones().then((datos) => {
+      const periodoDetectado = extraerPeriodoLectivo() || state.periodo;
+      aplicarDatosZonaComisiones(datos, periodoDetectado);
+
+      const select = document.getElementById(
+        "periodo",
+      ) as HTMLSelectElement | null;
+      if (select && state.periodosDisponibles.length > 0) {
+        select.innerHTML = state.periodosDisponibles
+          .map((p) => `<option value="${p.id}">${p.nombre}</option>`)
+          .join("");
+      }
+
+      renderMaterias();
+    });
+  }
 }
 
 if (document.readyState === "loading") {
-  document.addEventListener("DOMContentLoaded", crearLayout);
+  document.addEventListener("DOMContentLoaded", sincronizarRuta, {
+    once: true,
+  });
 } else {
-  crearLayout();
+  sincronizarRuta();
 }

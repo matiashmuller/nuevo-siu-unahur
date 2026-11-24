@@ -691,12 +691,12 @@ tbody tr:last-child td {
   }
 }
 
-/* Ocultar temporalmente la interfaz original de Guaraní */
-body > *:not(#nuevo-siu-root) {
+/* Ocultar la interfaz original de Guaraní solo cuando la nueva UI está activa */
+html.nuevo-siu-activo body > *:not(#nuevo-siu-root) {
   display: none !important;
 }
 
-body {
+html.nuevo-siu-activo body {
   overflow: hidden;
 }
 

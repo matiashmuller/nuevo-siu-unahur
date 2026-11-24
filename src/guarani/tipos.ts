@@ -1,8 +1,12 @@
+// src/guarani/tipos.ts
 export interface ComisionGuarani {
   id: string;
   nombre: string;
   turno: string;
   inscriptos: number;
+  periodo?: string;
+  horarios?: string[];
+  url?: string;
 }
 
 export interface MateriaGuarani {
